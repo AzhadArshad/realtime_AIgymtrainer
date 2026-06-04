@@ -29,9 +29,6 @@ data.db
 *.sqlite
 *.sqlite3
 
-# ML model files (large binaries — download separately)
-ml_models/*.task
-
 # Custom font (if licensed)
 static/AdobeClean.otf
 
