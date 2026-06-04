@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# Streamlit secrets (contains API keys — never commit)
+.streamlit/secrets.toml
+
+# Environment variables
+.env
+.env.*
+
+# Database (local data — not for version control)
+data.db
+*.db
+*.sqlite
+*.sqlite3
+
+# ML model files (large binaries — download separately)
+ml_models/*.task
+
+# Custom font (if licensed)
+static/AdobeClean.otf
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# pytest
+.pytest_cache/
+htmlcov/
+.coverage
