@@ -4,7 +4,6 @@ import av
 import numpy as np
 import mediapipe as mp
 import threading
-import streamlit as st
 from streamlit_webrtc import VideoProcessorBase
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
@@ -16,21 +15,31 @@ from detectors.lunges import LungesDetector
 from services.config.workout_config import POSE_CONNECTIONS
 
 
-# Cached at server startup — loads once, reused on every START click.
-# RunningMode.IMAGE is stateless so it's safe to share across instances.
-@st.cache_resource
+# Plain Python singleton — works in any thread including WebRTC background threads.
+# @st.cache_resource cannot be called from background threads (no session context).
+_landmarker_lock = threading.Lock()
+_landmarker_cache = None
+
+
 def _load_landmarker():
-    model_path = os.path.join(os.getcwd(), "ml_models", "pose_landmarker_full.task")
-    base_option = python.BaseOptions(model_asset_path=model_path)
-    options = vision.PoseLandmarkerOptions(
-        base_options=base_option,
-        running_mode=vision.RunningMode.IMAGE,
-        min_pose_detection_confidence=0.7,
-        min_pose_presence_confidence=0.7,
-        min_tracking_confidence=0.7,
-        output_segmentation_masks=False
-    )
-    return vision.PoseLandmarker.create_from_options(options)
+    global _landmarker_cache
+    with _landmarker_lock:
+        if _landmarker_cache is None:
+            model_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "..", "..", "ml_models", "pose_landmarker_full.task"
+            )
+            base_option = python.BaseOptions(model_asset_path=model_path)
+            options = vision.PoseLandmarkerOptions(
+                base_options=base_option,
+                running_mode=vision.RunningMode.IMAGE,
+                min_pose_detection_confidence=0.7,
+                min_pose_presence_confidence=0.7,
+                min_tracking_confidence=0.7,
+                output_segmentation_masks=False
+            )
+            _landmarker_cache = vision.PoseLandmarker.create_from_options(options)
+        return _landmarker_cache
 
 
 class VideoProcessorClass(VideoProcessorBase):
